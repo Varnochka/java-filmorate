@@ -19,15 +19,17 @@ public class FilmController {
     private int idFilm = 1;
     private final Map<Integer, Film> films = new HashMap<>();
 
-
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         log.info("Request add new Film");
 
-        if (!films.values().stream().noneMatch(filmSaved -> filmSaved.getName().equals(film.getName()) &&
-                filmSaved.getDescription().equals(film.getDescription()) &&
-                filmSaved.getDuration() == film.getDuration() &&
-                filmSaved.getReleaseDate().equals(film.getReleaseDate()))) {
+        // при добавлении нового фильма, которому еще id не присвоен,
+        // хэш код же формируется на основе всех полей кроме id
+        // т.е. не может же быть добавлен фильм с данными (названием, описанием, продолжительностью и датой релиза)
+        // которые есть у фильма, который уже сохранен?. поэтому id нужно исключить при формировании хэшкода?
+        if (films.values()
+                .stream()
+                .anyMatch(filmSaved -> filmSaved.equals(film))) {
             log.error("Film already exist");
             throw new ValidationException("Film  already exist");
         }
@@ -48,7 +50,7 @@ public class FilmController {
             throw new ValidationException("Invalid film id='" + film.getId() + "' of updatable user");
         }
 
-        if(films.get(film.getId()) == null){
+        if(!films.containsKey(film.getId())){
             log.error("Film with id='" + film.getId() + "'' s not exist");
             throw new ValidationException("Invalid id='" + film.getId() + "' of updatable user");
         }
