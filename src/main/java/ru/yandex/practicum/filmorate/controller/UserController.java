@@ -34,8 +34,10 @@ public class UserController {
         }
         user.setId(idUser++);
 
-        if(StringUtils.hasLength(user.getName())){
+        if(!StringUtils.hasLength(user.getName())){
             user.setName(user.getName());
+        }else {
+            user.setName(user.getLogin());
         }
 
         users.put(user.getId(), user);
