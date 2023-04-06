@@ -3,8 +3,12 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.NoSuchUserException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.imp.InMemoryUserStorage;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -24,73 +28,74 @@ public class UserControllerTest {
     }
 
     @BeforeEach
-    void init(){
+    void init() {
         user = new User(null, "user@mail.ru", "userLogin", "userName", LocalDate.now());
-        userController = new UserController();
+        UserStorage userStorage = new InMemoryUserStorage();
+        UserService userService = new UserService(userStorage);
+        userController = new UserController(userService);
     }
 
     @Test
-    void createUser_rejectEmail_emailIsNull(){
+    void createUser_rejectEmail_emailIsNull() {
         user.setEmail(null);
         assertEquals(1, validator.validate(user).size());
 
     }
 
     @Test
-    void createUser_rejectEmail_emailIsEmpty(){
+    void createUser_rejectEmail_emailIsEmpty() {
         user.setEmail("");
         assertEquals(1, validator.validate(user).size());
 
     }
 
     @Test
-    void createUser_acceptEmail_emailIsNotEmptyAndNotNull(){
+    void createUser_acceptEmail_emailIsNotEmptyAndNotNull() {
         assertTrue(validator.validate(user).isEmpty());
     }
 
     @Test
-    void createUser_rejectLogin_loginIsNull(){
+    void createUser_rejectLogin_loginIsNull() {
         user.setLogin(null);
         assertEquals(1, validator.validate(user).size());
-
     }
 
     @Test
-    void createUser_rejectLogin_loginIsEmpty(){
+    void createUser_rejectLogin_loginIsEmpty() {
         user.setLogin("");
         assertEquals(1, validator.validate(user).size());
     }
 
     @Test
-    void createUser_acceptLogin_loginIsNotEmptyAndNotNull(){
+    void createUser_acceptLogin_loginIsNotEmptyAndNotNull() {
         assertTrue(validator.validate(user).isEmpty());
     }
 
     @Test
-    void createUser_rejectBirthday_birthdayIsFuture(){
+    void createUser_rejectBirthday_birthdayIsFuture() {
         user.setBirthday(LocalDate.now().plusDays(10));
         assertEquals(1, validator.validate(user).size());
     }
 
     @Test
-    void updateUser_error_userWithIdIsNull(){
-        userController.addUser(user);
+    void updateUser_validationException_userWithIdIsNull() {
+        userController.createUser(user);
 
         user.setId(null);
         assertThrows(ValidationException.class, () -> userController.updateUser(user));
     }
 
     @Test
-    void updateUser_validationException_userWithIdIsIncorrect(){
-        userController.addUser(user);
+    void updateUser_validationException_userWithIdIsIncorrect() {
+        userController.createUser(user);
 
         user.setId(-5);
         assertThrows(ValidationException.class, () -> userController.updateUser(user));
     }
 
     @Test
-    void addUser_validationException_userWithLoginIsNotUnique(){
-        userController.addUser(user);
+    void addUser_validationException_userWithLoginIsNotUnique() {
+        userController.createUser(user);
 
         User newUser = new User(null, "user1@mail.ru", "userLogin", "userName", LocalDate.now());
 
@@ -98,11 +103,11 @@ public class UserControllerTest {
     }
 
     @Test
-    void updateUser_validationException_userIdIsNotExist(){
-        userController.addUser(user);
+    void updateUser_noSuchUserException_userIdIsNotExist() {
+        userController.createUser(user);
 
         User newUser = new User(10, "user@mail.ru", "userLogin1", "userName", LocalDate.now());
 
-        assertThrows(ValidationException.class, () -> userController.updateUser(newUser));
+        assertThrows(NoSuchUserException.class, () -> userController.updateUser(newUser));
     }
 }
