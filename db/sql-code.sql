@@ -5,6 +5,7 @@ CREATE TABLE "film"(
     "release_date" DATE NOT NULL,
     "duration" BIGINT NOT NULL,
     "rating_id" BIGINT NOT NULL
+    CHECK "duration" > 0 AND "release_date" > '1895-12-28';
 );
 ALTER TABLE
     "film" ADD PRIMARY KEY("film_id");
@@ -39,8 +40,10 @@ ALTER TABLE
 CREATE TABLE "user"(
     "user_id" BIGINT NOT NULL,
     "email" VARCHAR(30) NOT NULL,
+    "name" VARCHAR(50),
     "login" VARCHAR(20) NOT NULL,
     "birthday" DATE NOT NULL
+     CHECK "birthday" < CURRENT_DATE;
 );
 ALTER TABLE
     "user" ADD PRIMARY KEY("user_id");
