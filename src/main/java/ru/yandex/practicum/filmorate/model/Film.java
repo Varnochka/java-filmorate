@@ -1,24 +1,26 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import ru.yandex.practicum.filmorate.constraint.DateRelease;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.filmorate.constraint.DateRelease;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Film {
 
-    @Null
-    private Integer id;
+    private Long id;
 
     @NotBlank(message = "Title of film must be not empty")
     private String name;
@@ -31,10 +33,16 @@ public class Film {
     private LocalDate releaseDate;
 
     @Positive(message = "Duration of film must be positive value")
-    private Integer duration;
+    private Long duration;
 
     @JsonIgnore
-    private final Set<Integer> userLikes = new HashSet<>();
+    private final Set<Long> userLikes = new HashSet<>();
+
+    private Integer rate;
+
+    private Rating mpa;
+
+    private List<Genre> genres;
 
     @Override
     public boolean equals(Object o) {
@@ -47,11 +55,21 @@ public class Film {
                 && Objects.equals(duration, film.duration);
     }
 
-    public void addLike(Integer idUser){
+    public void addLike(Long idUser) {
         userLikes.add(idUser);
     }
 
-    public void deleteLike(Integer idUser) {
+    public void deleteLike(Long idUser) {
         userLikes.remove(idUser);
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("film_name", name);
+        values.put("description", description);
+        values.put("duration", duration);
+        values.put("release_date", releaseDate);
+        values.put("mpa_id", mpa.getId());
+        return values;
     }
 }

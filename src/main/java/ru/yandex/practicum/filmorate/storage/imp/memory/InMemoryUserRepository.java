@@ -1,4 +1,5 @@
-package ru.yandex.practicum.filmorate.storage.imp;
+package ru.yandex.practicum.filmorate.storage.imp.memory;
+
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
@@ -7,17 +8,16 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.util.*;
 
 @Component
-public class InMemoryUserStorage implements UserStorage {
+public class InMemoryUserRepository implements UserStorage {
 
-    private int idUser = 0;
+    private int idUser = 1;
 
     private final Map<Integer, User> users = new HashMap<>();
 
     @Override
-    public User create(User user) {
-        user.setId(++idUser);
+    public void create(User user) {
+        user.setId(idUser++);
         users.put(user.getId(), user);
-        return user;
     }
 
     @Override
@@ -32,12 +32,18 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public void deleteById(Integer id) {
+        Optional<User> optionalUser = findById(id);
+        optionalUser.ifPresent(user -> users.remove(user.getId()));
+    }
+
+    @Override
+    public List<User> findAll() {
         return new ArrayList<>(users.values());
     }
 
     @Override
-    public List<User> getUsersByIds(Set<Integer> usersIds) {
+    public List<User> findUsersByIds(Set<Integer> usersIds) {
         List<User> foundUsers = new ArrayList<>();
 
         for (Integer id : usersIds) {
@@ -50,11 +56,10 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public Optional<User> findByLogin(String login) {
         for (User user : users.values()) {
-            if(user.getLogin().equals(login)){
+            if (user.getLogin().equals(login)) {
                 return Optional.of(user);
             }
         }
         return Optional.empty();
     }
-
 }

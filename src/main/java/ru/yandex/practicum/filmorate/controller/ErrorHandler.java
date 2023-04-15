@@ -55,7 +55,8 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
                 .body(response);
     }
 
-    @ExceptionHandler(value = {NoSuchFilmException.class, NoSuchUserException.class})
+    @ExceptionHandler(value = {NoSuchFilmException.class, NoSuchUserException.class, NoSuchGenreException.class,
+            NoSuchMpaException.class})
     public ResponseEntity<Object> handleNoSuchElementException(final NoSuchElementException ex) {
         Map<String, Object> response = new LinkedHashMap<>();
 
@@ -87,7 +88,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
 
         response.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.name());
-        response.put("message", "Ошибка сервера");
+        response.put("message", "Ошибка сервера: " + ex.getMessage());
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

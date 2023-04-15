@@ -3,14 +3,12 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.ExistFilmException;
 import ru.yandex.practicum.filmorate.exception.NoSuchFilmException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,66 +16,78 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class FilmService {
-    private final FilmStorage filmStorage;
+    private final FilmStorage filmRepository;
     private final UserService userService;
 
-    public Film createFilm(@Valid @RequestBody Film film) {
-        log.info("Request create new Film");
+    public List<Film> getAllFilms() {
+        log.info("Request get all films");
+        return filmRepository.findAll();
+    }
 
-        if (filmStorage.exists(film)) {
+    public Film getFilmById(Long id) {
+        log.info("Request get film by id='{}'", id);
+        return filmRepository.findById(id).orElseThrow(
+                () -> new NoSuchFilmException("Film with id='" + id + "' not found"));
+    }
+
+    public Film createFilm(Film film) {
+        log.info("Request create new Film {}", film);
+
+        if (isExistFilm(film)) {
             log.error("Film same as {} already exists", film);
             throw new ExistFilmException("Film already exists");
         }
 
-        Film createdFilm = filmStorage.create(film);
-
-        log.info("Added new film {}", film);
-        return createdFilm;
+        return filmRepository.save(film).orElse(new Film());
     }
 
-    public Film updateFilm(@RequestBody Film film) {
+    public Film updateFilm(Film film) {
         log.info("Request update film");
 
         if (film.getId() == null || film.getId() <= 0) {
             throw new ValidationException("Invalid id='" + film.getId() + "' of updatable film");
         }
 
-        Optional<Film> filmOptional = filmStorage.findById(film.getId());
+        Optional<Film> filmOptional = filmRepository.findById(film.getId());
 
         if (filmOptional.isEmpty()) {
             throw new NoSuchFilmException("Film with id='" + film.getId() + "' not found");
         }
 
-        log.info("Updatable film {}", film);
-        return filmStorage.update(film);
+        return filmRepository.update(film).orElse(new Film());
     }
 
-    public Film getFilmById(Integer id) {
-        log.info("Request get film by id='{}'", id);
-        return filmStorage.findById(id).orElseThrow(
-                () -> new NoSuchFilmException("Film with id='" + id + "' not found"));
-    }
-
-    public List<Film> getAllFilms() {
-        log.info("Request get all films");
-        return filmStorage.getAllFilms();
-    }
-
-    public void addLikeByFilmId(Integer filmId, Integer userId) {
+    public void addLikeByFilmId(Long filmId, Integer userId) {
         log.info("Request add like user with id='{}' to film by id='{}'", userId, filmId);
-        Film film = getFilmById(filmId);
-        film.addLike(userId);
+
+        Optional<Film> optionalFilm = filmRepository.findById(filmId);
+        if (optionalFilm.isEmpty()) {
+            throw new NoSuchFilmException("Film with id='" + filmId + "' not found");
+        }
+        userService.getUserById(userId);
+
+        filmRepository.addLike(filmId, userId);
     }
 
-    public void deleteLikeByFilmId(Integer filmId, Integer userId) {
+    public void deleteLikeByFilmId(Long filmId, Integer userId) {
         log.info("Request delete like user with id='{}' to film by id='{}'", userId, filmId);
-        Film film = getFilmById(filmId);
+
+        Optional<Film> optionalFilm = filmRepository.findById(filmId);
+        if (optionalFilm.isEmpty()) {
+            throw new NoSuchFilmException("Film with id='" + filmId + "' not found");
+        }
         userService.getUserById(userId);
-        film.deleteLike(userId);
+
+        filmRepository.deleteLike(filmId, userId);
     }
+
+    private boolean isExistFilm(Film film) {
+        return filmRepository.isExistFilm(film).isPresent();
+    }
+
 
     public List<Film> getPopularFilms(Integer count) {
         log.info("Request get popular films");
-        return filmStorage.findPopularFilms(count);
+        return filmRepository.findPopularFilms(count);
     }
 }

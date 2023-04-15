@@ -9,17 +9,15 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.HashSet;
-
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserService {
     private final UserStorage userStorage;
+    private final FriendshipService friendshipService;
 
     public User createUser(User user) {
         log.info("Request create new User");
@@ -34,10 +32,11 @@ public class UserService {
             user.setName(user.getLogin());
         }
 
-        User newUser = userStorage.create(user);
+        userStorage.create(user);
+        User createdUser = getUserByLogin(user.getLogin());
 
-        log.info("Added new user {}", newUser);
-        return newUser;
+        log.info("Added new user {}", createdUser);
+        return createdUser;
     }
 
     public User updateUser(User user) {
@@ -69,55 +68,54 @@ public class UserService {
 
     public List<User> getAllUsers() {
         log.info("Request get all users");
-        return userStorage.getAllUsers();
+        return userStorage.findAll();
     }
 
     public User getUserById(Integer id) {
-        log.info("Request get user by id='{}'", id);
         return userStorage.findById(id)
                 .orElseThrow(() -> new NoSuchUserException("User with id='" + id + "' not found"));
+    }
+
+    public User getUserByLogin(String login) {
+        return userStorage.findByLogin(login)
+                .orElseThrow(() -> new NoSuchUserException("User with login='" + login + "' not found"));
     }
 
     public void addFriend(Integer userId, Integer friendId) {
         log.info("Request add friend");
 
-        User foundUser = getUserById(userId);
-        User foundFriend = getUserById(friendId);
+        checkExistById(userId);
+        checkExistById(friendId);
 
-        foundUser.addFriend(friendId);
-        foundFriend.addFriend(userId);
+        List<User> friend = friendshipService.getFriend(userId, friendId);
+
+        if (friend.isEmpty()) {
+            friendshipService.addFriend(userId, friendId);
+        }
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
         log.info("Request delete friend");
-
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
-
-        friend.deleteFriend(friendId);
-        user.deleteFriend(userId);
+        friendshipService.deleteFriendship(userId, friendId);
     }
 
     public List<User> getFriendsByUserId(Integer userId) {
         log.info("Request get friend by user id");
 
-        User user = getUserById(userId);
-        return userStorage.getUsersByIds(user.getFriends());
+        checkExistById(userId);
+
+        return friendshipService.getFriendsByUserId(userId);
     }
 
-    public List<User> getMutualFriends(Integer id, Integer otherId) {
-        log.info("Request get mutual friends by user id");
+    public List<User> getCommonFriends(Integer id, Integer otherId) {
+        log.info("Request get common friends by users id='{}' and id='{}'", id, otherId);
+        return friendshipService.getCommonFriends(id, otherId);
+    }
 
-        User user = getUserById(id);
-        User otherUser = getUserById(otherId);
 
-        Set<Integer> userFriendsIds = user.getFriends();
-        Set<Integer> otherUserFriendsIds = otherUser.getFriends();
-
-        Set<Integer> friends = new HashSet<>(userFriendsIds);
-
-        friends.retainAll(otherUserFriendsIds);
-
-        return userStorage.getUsersByIds(friends);
+    private void checkExistById(Integer id) {
+        if (userStorage.findById(id).isEmpty()) {
+            throw new NoSuchUserException("User with id='" + id + "' not found");
+        }
     }
 }
