@@ -39,8 +39,8 @@ public class GenreRepository {
 
     public List<Genre> findGenresIdByFilmId(Long id) {
         return jdbcTemplate.query("SELECT GENRE_ID FROM FILMS_GENRES WHERE FILM_ID = ?",
-                (rs, rowNum) -> Genre.builder().
-                        id(rs.getInt("genre_id"))
+                (rs, rowNum) -> Genre.builder()
+                        .id(rs.getInt("genre_id"))
                         .build(), id);
     }
 }
