@@ -126,8 +126,8 @@ public class FilmRepository implements FilmStorage {
 
     private Optional<Film> getAndValidationFilmByFilmId(Long id) {
         try {
-            return Optional.ofNullable(jdbcTemplate.
-                    queryForObject("SELECT f.ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, r.ID AS mpa_id, r.NAME AS mpa_name " +
+            return Optional.ofNullable(jdbcTemplate
+                    .queryForObject("SELECT f.ID, f.NAME, f.DESCRIPTION, f.DURATION, f.RELEASE_DATE, r.ID AS mpa_id, r.NAME AS mpa_name " +
                                     "FROM FILMS AS f " +
                                     "JOIN MPA AS r ON f.MPA_ID = r.ID " +
                                     "WHERE f.ID = ?",
