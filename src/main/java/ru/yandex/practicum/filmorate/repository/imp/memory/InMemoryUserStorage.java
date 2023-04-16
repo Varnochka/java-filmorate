@@ -1,18 +1,16 @@
-package ru.yandex.practicum.filmorate.storage.imp.memory;
-
+package ru.yandex.practicum.filmorate.repository.imp.memory;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.repository.UserStorage;
 
 import java.util.*;
 
 @Component
-public class InMemoryUserRepository implements UserStorage {
-
-    private int idUser = 1;
+public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Integer, User> users = new HashMap<>();
+    private int idUser = 1;
 
     @Override
     public void create(User user) {
@@ -46,20 +44,15 @@ public class InMemoryUserRepository implements UserStorage {
     public List<User> findUsersByIds(Set<Integer> usersIds) {
         List<User> foundUsers = new ArrayList<>();
 
-        for (Integer id : usersIds) {
-            foundUsers.add(users.get(id));
-        }
-
+        usersIds.forEach(id -> foundUsers.add(users.get(id)));
         return foundUsers;
     }
 
     @Override
     public Optional<User> findByLogin(String login) {
-        for (User user : users.values()) {
-            if (user.getLogin().equals(login)) {
-                return Optional.of(user);
-            }
-        }
-        return Optional.empty();
+        return users.values()
+                .stream().filter(user -> user.getLogin().equals(login))
+                .findAny();
     }
+
 }

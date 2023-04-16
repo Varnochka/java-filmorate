@@ -55,8 +55,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
                 .body(response);
     }
 
-    @ExceptionHandler(value = {NoSuchFilmException.class, NoSuchUserException.class, NoSuchGenreException.class,
-            NoSuchMpaException.class})
+    @ExceptionHandler(value = NoSuchElementException.class)
     public ResponseEntity<Object> handleNoSuchElementException(final NoSuchElementException ex) {
         Map<String, Object> response = new LinkedHashMap<>();
 
@@ -69,8 +68,8 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
                 .body(response);
     }
 
-    @ExceptionHandler(value = {ExistUserException.class, ExistFilmException.class})
-    public ResponseEntity<Object> handleExistElementException(final RuntimeException ex) {
+    @ExceptionHandler(value = ExistElementException.class)
+    public ResponseEntity<Object> handleExistElementException(final ExistElementException ex) {
         Map<String, Object> response = new LinkedHashMap<>();
 
         response.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.imp.dao;
+package ru.yandex.practicum.filmorate.repository.imp.database;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -23,4 +23,5 @@ public class MpaRepository {
         return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM MPA WHERE ID = ?",
                 new BeanPropertyRowMapper<>(Rating.class), id));
     }
+
 }

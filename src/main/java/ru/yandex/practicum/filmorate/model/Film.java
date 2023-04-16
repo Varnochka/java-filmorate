@@ -36,13 +36,13 @@ public class Film {
     private Long duration;
 
     @JsonIgnore
-    private final Set<Long> userLikes = new HashSet<>();
+    private Set<Long> userLikes = new HashSet<>();
 
     private Integer rate;
 
     private Rating mpa;
 
-    private List<Genre> genres;
+    private Set<Genre> genres;
 
     @Override
     public boolean equals(Object o) {
@@ -53,23 +53,5 @@ public class Film {
                 && Objects.equals(description, film.description)
                 && Objects.equals(releaseDate, film.releaseDate)
                 && Objects.equals(duration, film.duration);
-    }
-
-    public void addLike(Long idUser) {
-        userLikes.add(idUser);
-    }
-
-    public void deleteLike(Long idUser) {
-        userLikes.remove(idUser);
-    }
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> values = new HashMap<>();
-        values.put("film_name", name);
-        values.put("description", description);
-        values.put("duration", duration);
-        values.put("release_date", releaseDate);
-        values.put("mpa_id", mpa.getId());
-        return values;
     }
 }
