@@ -21,9 +21,11 @@ public class UserRepository implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public void create(User user) {
+    public Optional<User> create(User user) {
         jdbcTemplate.update("INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)",
                 user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
+
+        return findByLogin(user.getLogin());
     }
 
     @Override

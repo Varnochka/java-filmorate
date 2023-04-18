@@ -10,7 +10,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Rating;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.repository.FilmStorage;
 import ru.yandex.practicum.filmorate.repository.imp.database.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.repository.imp.database.mapper.MpaMapper;
@@ -192,7 +192,7 @@ public class FilmRepository implements FilmStorage {
         return filmGenres;
     }
 
-    private Rating getMpaById(Long filmId) {
+    private Mpa getMpaById(Long filmId) {
         return jdbcTemplate.queryForObject(SELECT_MPA_BY_FILM_ID, new MpaMapper(), filmId);
     }
 
@@ -204,5 +204,11 @@ public class FilmRepository implements FilmStorage {
             likes.add(likesRowSet.getLong("user_id"));
         }
         return likes;
+    }
+
+    @Override
+    public void deleteById(Long filmId) {
+        String sqlQueryDelete = "delete from FILMS where id = ?";
+        jdbcTemplate.update(sqlQueryDelete, filmId);
     }
 }

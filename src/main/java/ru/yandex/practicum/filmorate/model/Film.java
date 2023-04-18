@@ -40,7 +40,7 @@ public class Film {
 
     private Integer rate;
 
-    private Rating mpa;
+    private Mpa mpa;
 
     private Set<Genre> genres;
 

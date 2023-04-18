@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface UserStorage {
-    void create(User user);
+    Optional<User> create(User user);
 
     List<User> findAll();
 
@@ -20,5 +20,6 @@ public interface UserStorage {
     List<User> findUsersByIds(Set<Integer> ids);
 
     Optional<User> findByLogin(String login);
+
 }
 

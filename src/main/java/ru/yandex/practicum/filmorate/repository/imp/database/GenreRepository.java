@@ -1,14 +1,14 @@
 package ru.yandex.practicum.filmorate.repository.imp.database;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.imp.database.mapper.GenreMapper;
 
 import java.util.List;
-import java.util.Optional;
-
+import java.util.NoSuchElementException;
 @Repository
 @RequiredArgsConstructor
 public class GenreRepository {
@@ -20,10 +20,12 @@ public class GenreRepository {
                 new GenreMapper());
     }
 
-    public Optional<Genre> findById(Integer id) {
-        Genre genre = jdbcTemplate.queryForObject("SELECT * FROM genres WHERE id = ?",
-                new GenreMapper(), id);
-
-        return Optional.ofNullable(genre);
+    public Genre findById(Integer id) {
+        try {
+            return jdbcTemplate.queryForObject("SELECT * FROM genres WHERE id = ?",
+                    new GenreMapper(), id);
+        } catch (DataAccessException exception) {
+            throw new NoSuchElementException("Genre with id='" + id + "' not found");
+        }
     }
 }
