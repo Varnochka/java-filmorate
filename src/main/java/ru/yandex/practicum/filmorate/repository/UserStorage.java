@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.repository;
 
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -7,16 +7,19 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface UserStorage {
-    User create(User user);
+    Optional<User> create(User user);
+
+    List<User> findAll();
 
     Optional<User> findById(Integer id);
 
     User update(User user);
 
-    List<User> getAllUsers();
+    void deleteById(Integer id);
 
-    List<User> getUsersByIds(Set<Integer> ids);
+    List<User> findUsersByIds(Set<Integer> ids);
 
     Optional<User> findByLogin(String login);
+
 }
 
