@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.repository.imp.database.mapper.GenreMapper;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+
 @Repository
 @RequiredArgsConstructor
 public class GenreRepository {
